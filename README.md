@@ -2,6 +2,10 @@
 
 The application will monitor and adjust the inventory of shoes in real-time by processing incoming sales data via WebSocket, allowing the inventory department to keep track of shoe models' stock levels across various stores.
 
+## Assumptions
+
+I assume that each new incoming websocket event represents 1 sale.
+
 # Running on host
 
 ## Pre-requisites
