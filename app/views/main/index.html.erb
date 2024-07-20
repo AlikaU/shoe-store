@@ -1,1 +1,25 @@
 <h1>Welcome to the shoe store dashboard!</h1>
+<p>This report lets you see the popularity of different shoe models.</p>
+<div id="popularity-report">
+  <!-- SSE data will be injected here -->
+</div>
+<script>
+  const eventSource = new EventSource("/popularity")
+
+  eventSource.addEventListener("message", (event) => {
+    console.log("got new event: ", event); // todo: remove
+    const data = JSON.parse(event.data);
+    updatePopularityReport(data);
+  })
+
+  function updatePopularityReport(data) {
+      const reportElement = document.getElementById('popularity-report');
+      reportElement.innerHTML = '';
+  
+      data.forEach(item => {
+        const div = document.createElement('div');
+        div.textContent = `Model: ${item.model}, Sales percent: ${item.sales_percent}%`;
+        reportElement.appendChild(div);
+      });
+    }
+</script>

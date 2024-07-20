@@ -10,4 +10,5 @@ Rails.application.routes.draw do
   get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
 
   root "main#index"
+  get "popularity", to: "popularity#index"
 end
