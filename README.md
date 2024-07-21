@@ -26,7 +26,8 @@ I assume that each event coming from the provided program represents 1 sale (we 
 - Ruby 3.3.3
 
 ## Implementation notes
-- Due to time constraints, there are todos left unimplemented, and the features are very limited, but the project covers foundations on top of which more features can be built.
+- Due to time constraints, there are todos left unimplemented.
+- Feature set is very limited, but the project covers foundations on top of which more features can be built.
 
 
 
