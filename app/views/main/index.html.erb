@@ -7,7 +7,6 @@
   const eventSource = new EventSource("/popularity")
 
   eventSource.addEventListener("message", (event) => {
-    console.log("got new event: ", event); // todo: remove
     const data = JSON.parse(event.data);
     updatePopularityReport(data);
   })
