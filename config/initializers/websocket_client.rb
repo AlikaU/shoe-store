@@ -1,3 +1,3 @@
-require "#{Rails.root}/app/services/websocket_client" # todo: find better way
+require "#{Rails.root}/app/services/sales_websocket_client" # todo: find better way
 
-WebsocketClient.start
+SalesWebsocketClient.start
