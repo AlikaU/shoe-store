@@ -5,7 +5,7 @@ class PopularityController < ApplicationController
     response.headers["Content-Type"] = "text/event-stream"
     response.headers["Cache-Control"] = "no-cache"
     response.headers["Connection"] = "keep-alive"
-
+    puts "inside popularity controller"
     loop do
       popularity_report = PopularityCalculator.new.calculate
       response.stream.write("data: #{popularity_report.to_json}\n\n")
