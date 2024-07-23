@@ -2,7 +2,6 @@ require "test_helper"
 
 class SuggestionsTest < ActiveSupport::TestCase
   def setup
-    # Setup some sample sales data
     Sale.delete_all
     Sale.create(model: "Model A", store: "Store A") # Model A is sold the least
     Sale.create(model: "Model B", store: "Store A") # Model B is the bestseller

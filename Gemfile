@@ -43,6 +43,7 @@ gem "eventmachine"
 gem "webmock"
 gem "em-websocket"
 gem "em-eventsource"
+gem "mocha"
 
 # debugging
 gem "pry"
