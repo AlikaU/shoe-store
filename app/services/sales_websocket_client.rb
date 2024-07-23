@@ -10,7 +10,6 @@ class SalesWebsocketClient
         sleep 3
         p "Connecting to websocket server..." # todo: retry?
         ws.on :open do |event|
-          p "websocket client: WebSocket connection opened"
         end
         ws.on :message do |event|
           process_incoming_event(event)
@@ -26,8 +25,6 @@ class SalesWebsocketClient
   private
 
   def self.process_incoming_event(event)
-    puts "Received data: #{event.data}"
-
     begin
       data = JSON.parse(event.data)
     rescue JSON::ParserError => e

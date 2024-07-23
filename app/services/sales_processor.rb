@@ -11,6 +11,7 @@ class SalesProcessor
     #       # note: could insert in batches if hitting the db too often is a concern
     sale = Sale.new(model: sale_data["model"], store: sale_data["store"])
     if sale.save
+      puts "New sale processed: #{sale_data}"
       { success: true }
     else
       { success: false, errors: sale.errors.full_messages }

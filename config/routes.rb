@@ -11,4 +11,5 @@ Rails.application.routes.draw do
 
   root "main#index"
   get "popularity", to: "popularity#index"
+  get "suggestions", to: "suggestions#index"
 end
