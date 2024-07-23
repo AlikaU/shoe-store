@@ -9,7 +9,6 @@ class SalesProcessor
   def process_incoming_sale(sale_data)
     #       # todo: add more tables for other features as needed, e.g. inventory
     #       # note: could insert in batches if hitting the db too often is a concern
-    #       Sale.create(model: data["model"], store: data["store"])
     sale = Sale.new(model: sale_data["model"], store: sale_data["store"])
     if sale.save
       { success: true }

@@ -17,8 +17,10 @@ I assume that each event coming from the provided program represents 1 sale (we 
 
 ## Design decisions
 
-- Used SSE events to send data to the frontend, since the data goes in only one direction.
+- Used SSE events to send data to the UI, since the data goes in only one direction.
 - Used MiniTest for testing, since this is a small project.
+    - Integration tests cover as much of the logic as I could: processing new sales events, calculations business logic, model validation. Would have wanted to also cover the websocket client and the sent SSE events, but couldn't get it to work quickly.
+    - Unit tests cover main business logic to make extra sure it is right.
 
 # Running on host
 

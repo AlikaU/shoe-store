@@ -13,13 +13,16 @@ class PopularityCalculatorTest < ActiveSupport::TestCase
     Sale.create(model: "Model B",  store: "Store C")
     Sale.create(model: "Model C",  store: "Store D")
 
-    # act & assert
-    expected_report = [
+    # act
+    result = @calculator.calculate
+
+    # assert
+    expected = [
       { model: "Model A", sales_percent: 50.0 },
       { model: "Model B", sales_percent: 25.0 },
       { model: "Model C", sales_percent: 25.0 }
     ]
-    assert_equal expected_report, @calculator.calculate
+    assert_equal expected, result
   end
 
   # todo: move to integration

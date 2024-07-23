@@ -1,3 +1,5 @@
+# This class calculates the popularity of each model based on the number of sales.
+# It returns a report with the percentage of total sales for each model.
 class PopularityCalculator
   def initialize
   end
