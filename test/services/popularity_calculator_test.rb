@@ -25,19 +25,6 @@ class PopularityCalculatorTest < ActiveSupport::TestCase
     assert_equal expected, result
   end
 
-  # todo: move to integration
-  # test "should ignore model with empty name" do
-  #   # arrange
-  #   Sale.create(model: "Model A", store: "Store A")
-  #   Sale.create(model: "",  store: "Store B")
-
-  #   # act & assert
-  #   expected_report = [
-  #     { model: "Model A", sales_percent: 100.0 }
-  #   ]
-  #   assert_equal expected_report, @calculator.calculate
-  # end
-
   test "should return 100% if only one model sold" do
     # arrange
     Sale.create(model: "Model A", store: "Store A")

@@ -1,8 +1,8 @@
 # Shoe store application
 
-The application will monitor and adjust the inventory of shoes in real-time by processing incoming sales data via WebSocket, allowing the inventory department to keep track of shoe models' stock levels across various stores.
+Here is my take on the shoe store problem: https://github.com/mathieugagne/shoe-store. I used this project to get familiar with Ruby and Ruby on Rails, this is my first time working with either.
 
-I used this project as an opportunity to get familiar with Ruby and Rails.
+The application monitors and adjust the inventory of shoes in real-time by processing incoming sales data via WebSocket, allowing the inventory department to keep track of shoe models' stock levels across various stores.
 
 ## Assumptions
 
@@ -15,10 +15,15 @@ We report % of sales for each shoe model.
 
 I assume that each event coming from the provided program represents 1 sale (we assume 1 sale = 1 pair of shoes sold), and based on that I can report sales per model / total sales.
 
+
+### Shoe store suggestions
+
+Based on the number of sales per model, suggest discounting unpopular items, and re-stocking on popular ones.
+
 ## Design decisions
 
-- Used SSE events to send data to the UI, since the data goes in only one direction.
 - Used MiniTest for testing, since this is a small project.
+- Testing approach:
     - Integration tests cover as much of the logic as I could: processing new sales events, calculations business logic, model validation. Would have wanted to also cover the websocket client and the sent SSE events, but couldn't get it to work quickly.
     - Unit tests cover main business logic to make extra sure it is right.
 
