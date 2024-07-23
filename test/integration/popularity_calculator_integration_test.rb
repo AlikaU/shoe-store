@@ -5,23 +5,10 @@ require "em-eventsource"
 
 
 class PopularityCalculatorIntegrationTest < ActionDispatch::IntegrationTest
-  def setup
-    @calculator = PopularityCalculator.new
-
-    # for the sse test attempt
-    # @port = 3000
-    # @url = "http://localhost:#{@port}/popularity"
-  end
-
+  # for the websocket test attempt
   # def teardown
   #   @mock_server.stop
   # end
-
-
-  test "should serve welcome page" do
-    get "/"
-    assert_select "h1", "Welcome to the shoe store dashboard!"
-  end
 
   test "should process sales and calculate sales percentage correctly" do
     # arrange
@@ -32,7 +19,7 @@ class PopularityCalculatorIntegrationTest < ActionDispatch::IntegrationTest
       { "model" => "Model C", "store" => "Store D" }
     ]
 
-    # act: process new sales & calculate popularity report
+    # act: process new sales & get popularity report
     sales.each do |sale|
       result = SalesProcessor.new.process_incoming_sale(sale)
       if !result[:success]
@@ -40,15 +27,16 @@ class PopularityCalculatorIntegrationTest < ActionDispatch::IntegrationTest
       end
       assert result[:success]
     end
-    result = @calculator.calculate
+    get "/popularity"
 
     # assert
+    assert_response :success
     expected = [
-      { model: "Model A", sales_percent: 50.0 },
-      { model: "Model B", sales_percent: 25.0 },
-      { model: "Model C", sales_percent: 25.0 }
-    ]
-    assert_equal expected, result
+      { "model" => "Model A", "sales_percent" => 50.0 },
+      { "model" => "Model B", "sales_percent" => 25.0 },
+      { "model" => "Model C", "sales_percent" => 25.0 }
+  ]
+    assert_equal expected, JSON.parse(response.body)
   end
 
 
@@ -67,14 +55,15 @@ class PopularityCalculatorIntegrationTest < ActionDispatch::IntegrationTest
     sales.each do |sale|
       SalesProcessor.new.process_incoming_sale(sale)
     end
-    result = @calculator.calculate
+    get "/popularity"
 
     # assert
+    assert_response :success
     expected = [
       #  the only valid sales are for model A, nothing else should appear
-      { model: "Model A", sales_percent: 100.0 }
+      { "model" => "Model A", "sales_percent" => 100.0 }
     ]
-    assert_equal expected, result
+    assert_equal expected, JSON.parse(response.body)
   end
 
 
@@ -96,29 +85,8 @@ class PopularityCalculatorIntegrationTest < ActionDispatch::IntegrationTest
   #   assert_equal expected_report, result
   # end
 
-  # Attempt to test SSE events + business logic
-  # test "should calculate popularity and send popularity report" do
-  #   # arrange
-  #   Sale.create(model: "Model A", store: "Store A")
-  #   Sale.create(model: "Model A",  store: "Store B")
-  #   Sale.create(model: "Model B",  store: "Store C")
-  #   Sale.create(model: "Model C",  store: "Store D")
-  #
-  #   # act: consume the SSE events on /popularity
-  #   EM.run do
-  #     source = EventMachine::EventSource.new(@url)
-  #     source.message do |message|
-  #       # this block is never reached..
-  #       puts "new message #{message}"
-  #     end
-  #     source.error do |error|
-  #       puts "sse error: #{error}" # I see 'sse error: Connection lost. Reconnecting.'
-  #     end
-  #     source.start # start listening
-  #   end
-  #   sleep 10 # todo: don't sleep, disconnect after X messages instead
-  #
-  #   # assert ...
-  #   assert true
-  # end
+  test "should serve welcome page" do
+    get "/"
+    assert_select "h1", "Welcome to the shoe store dashboard!"
+  end
 end
