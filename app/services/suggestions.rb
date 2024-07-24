@@ -23,7 +23,7 @@ class Suggestions
       when :worst
         model, count = model_sales.min_by { |model, count| count }
       end
-      sales_percent = (count.to_f / total_sales).round(2)
+      sales_percent = (count.to_f / total_sales * 100).round(2)
       {
         model: model,
         sales_percent: sales_percent

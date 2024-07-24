@@ -31,9 +31,9 @@
     });
   }
 
-  // get the popularity report, then update it every 5s
+  // get the popularity report, then update it every 2s
   fetchPopularityReport();
-  setInterval(fetchPopularityReport, 5000);
+  setInterval(fetchPopularityReport, 2000);
 
   function fetchSuggestions() {
     fetch('/suggestions')
@@ -59,18 +59,4 @@
   fetchSuggestions();
   setInterval(fetchSuggestions, 5000);
 
-  // const suggestionsSource = new EventSource("/suggestions")
-  // suggestionsSource.addEventListener("message", (event) => {
-  //   // const data = JSON.parse(event.data);
-  //   console.log(event.data);
-  //   updateSuggestion(event.data);
-  // })
-
-  // function updateSuggestion(data) {
-  //   const reportElement = document.getElementById('suggestion');
-  //   reportElement.innerHTML = '';
-  //   const div = document.createElement('div');
-  //   div.textContent = data;
-  //   reportElement.appendChild(div);
-  // }
 </script>
