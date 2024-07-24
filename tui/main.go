@@ -1,11 +1,6 @@
 package main
 
-// A simple example that shows how to render an animated progress bar. In this
-// example we bump the progress by 25% every two seconds, animating our
-// progress bar to its new target state.
-//
-// It's also possible to render a progress bar in a more static fashion without
-// transitions. For details on that approach see the progress-static example.
+// A very quick go at a terminal UI for the shoe store dashboard, not meant to be prod-ready.
 
 import (
 	"fmt"
@@ -44,7 +39,6 @@ func main() {
 	log.Print("\n\n\nStarting up...")
 
 	m := model{
-		// progress: progress.New(progress.WithDefaultGradient()),
 	}
 
 	if _, err := tea.NewProgram(m).Run(); err != nil {
@@ -69,6 +63,7 @@ type tickMsg time.Time
 type model struct {
 	progress progress.Model
 	popularityReport popularityReport
+	suggestion string
 	err error
 }
 
@@ -82,7 +77,10 @@ type shoeModelSales struct {
 }
 
 func (m model) Init() tea.Cmd {
-	return  tea.Batch(tickCheckPopularityCmd(), checkPopularity)
+	return  tea.Batch(
+		tickCheckPopularityCmd(), checkPopularity,
+		tickCheckSuggestionsCmd(), checkSuggestions,
+	)
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -97,20 +95,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 
-	// case tickMsg:
-	// 	if m.progress.Percent() == 1.0 {
-	// 		return m, tea.Quit
-	// 	}
-
-		// Note that you can also use progress.Model.SetPercent to set the
-		// percentage value explicitly, too.
-		// cmd := m.progress.IncrPercent(0.25)
-        
-        // ran := 0.5 - float64(time.Now().Nanosecond() % 100) / 100
-        // cmd := m.progress.SetPercent(ran)
-		// return m, tea.Batch(tickCmd(), cmd)
-		return m, nil
-
 	// FrameMsg is sent when the progress bar wants to animate itself
 	case progress.FrameMsg:
 		progressModel, cmd := m.progress.Update(msg)
@@ -121,6 +105,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.err = nil
 		m.popularityReport.shoeModelSales = msg
 		return m, tickCheckPopularityCmd()
+
+	case suggestionMsg:
+		m.err = nil
+		m.suggestion = string(msg)
+		return m, tickCheckSuggestionsCmd()
 
 	case errMsg:
         m.err = msg
@@ -141,60 +130,32 @@ func (m model) View() string {
 	popularityReport := m.popularityReport.View()
     if m.err != nil {
 		if _, ok := m.err.(errNotConnected); ok {
-			popularityReport = fmt.Sprint("Waiting to connect to server...")
+			popularityReport = fmt.Sprint("\nWaiting to connect to server...")
 		} else {
 			return fmt.Sprintf("\nWe had some trouble: %v\n\n", m.err)
 		}
     }
 
+	suggestion := ""
+	if m.suggestion != "" {
+		suggestion = fmt.Sprintf("%s\n\n", wrapText("Suggestion: " + m.suggestion, maxWidth - 2 * padding))
+	}
+
 	return "\n" +
-  	`         __                  __              
-    ___ / /  ___  ___   ___ / /____  _______ 
-   (_-</ _ \/ _ \/ -_) (_-</ __/ _ \/ __/ -_)
-  /___/_//_/\___/\__/ /___/\__/\___/_/  \__/ 
-                                           ` + "\n\n" +
+  		asciiArt + "\n\n" +
 		pad + "Welcome to the shoe store dashboard!\n\n" +
-		pad + "This report lets you see the popularity of different shoe models. \n" +
+		pad + "Here you can see the popularity of different shoe models. \n" +
 		pad + popularityReport + "\n\n" +
+		pad + suggestion + "\n\n" +
 		pad + helpStyle("Press any key to quit")
 }
 
 func (p popularityReport) View() string {
-	// result := "\n"
-	// result += pad + fmt.Sprintf("%-10s %9s\n", "Model", "% of sales")
-	// result += pad + fmt.Sprintf("%-10s %9s\n", strings.Repeat("-", 10), strings.Repeat("-", 9))
-	
-	// log.Printf("shoeModelSales: %v", p.shoeModelSales)
-	// for _, sale := range p.shoeModelSales {
-	// 	result += pad + fmt.Sprintf("%-10s %6.2f%%\n", sale.ShoeModel, sale.SalesPercent)
-	// }
-	// return result
-	// maxWidth := 50 // Maximum width for the bar
-	// pad := strings.Repeat(" ", 2)
-	
-	// // Find the maximum sales percentage
-	// maxSalesPercent := 0.0
-	// for _, sale := range p.shoeModelSales {
-	// 	if sale.SalesPercent > maxSalesPercent {
-	// 		maxSalesPercent = sale.SalesPercent
-	// 	}
-	// }
 
-	// result := "\n"
-	// result += pad + fmt.Sprintf("%-10s %9s %s\n", "Model", "% of sales", "Bar")
-	// result += pad + fmt.Sprintf("%-10s %9s %s\n", strings.Repeat("-", 10), strings.Repeat("-", 9), strings.Repeat("-", maxWidth))
-
-	// log.Printf("shoeModelSales: %v", p.shoeModelSales)
-	// for _, sale := range p.shoeModelSales {
-	// 	barLength := int((sale.SalesPercent / maxSalesPercent) * float64(maxWidth))
-	// 	bar := strings.Repeat("|", barLength)
-	// 	result += pad + fmt.Sprintf("%-10s %6.2f%% %s\n", sale.ShoeModel, sale.SalesPercent, bar)
-	// }
 	// return result
-	barWidth := 59 // Maximum width for the bar
+	maxBarWidth := 59
 	pad := strings.Repeat(" ", 2)
 	
-	// Find the maximum sales percentage
 	maxSalesPercent := 0.0
 	for _, sale := range p.shoeModelSales {
 		if sale.SalesPercent > maxSalesPercent {
@@ -206,9 +167,8 @@ func (p popularityReport) View() string {
 	result += pad + fmt.Sprintf("%-10s %9s\n", "Model", "% of sales")
 	result += pad + fmt.Sprintf(strings.Repeat("-", maxWidth - 2) + "\n")
 
-	log.Printf("shoeModelSales: %v", p.shoeModelSales)
 	for _, sale := range p.shoeModelSales {
-		barLength := int((sale.SalesPercent / maxSalesPercent) * float64(barWidth))
+		barLength := int((sale.SalesPercent / maxSalesPercent) * float64(maxBarWidth))
 		bar := strings.Repeat("|", barLength)
 		result += pad + fmt.Sprintf("%-10s %-59s %6.2f%%\n", sale.ShoeModel, bar, sale.SalesPercent)
 	}
@@ -216,8 +176,43 @@ func (p popularityReport) View() string {
 }
 
 
+type errNotConnected struct {err error}
+func (e errNotConnected) Error() string { return e.err.Error() }
+
+type errNotConnectedMsg struct {err error}
+func (e errNotConnectedMsg) Error() string { return e.err.Error() }
+
+type errMsg struct{ err error }
+func (e errMsg) Error() string { return e.err.Error() }
+
+type popularityMsg []shoeModelSales
+
+type suggestionMsg string
+
 // commands
 
+func tickCheckSuggestionsCmd() tea.Cmd {
+	return tea.Tick(time.Second*5, func(t time.Time) tea.Msg {
+		return checkSuggestions()
+	})
+}
+
+func checkSuggestions() tea.Msg {
+	bodyBytes, errM := sendGetRequesst(suggestionsURL)
+	if errM != nil {
+		return errM
+	}
+	var suggestionsResponse suggestionsResponse
+	err := json.Unmarshal(bodyBytes, &suggestionsResponse)
+	if err != nil {
+		return errMsg{err}
+	}
+	return suggestionMsg(suggestionsResponse.Suggestion)
+}
+
+type suggestionsResponse struct {
+	Suggestion string `json:"suggestion"`
+}
 
 func tickCheckPopularityCmd() tea.Cmd {
 	return tea.Tick(time.Second*1, func(t time.Time) tea.Msg {
@@ -225,45 +220,74 @@ func tickCheckPopularityCmd() tea.Cmd {
 	})
 }
 
-type errNotConnected struct {err error}
-func (e errNotConnected) Error() string { return e.err.Error() }
-
-type errNotConnectedMsg struct {err error}
-func (e errNotConnectedMsg) Error() string { return e.err.Error() }
-type popularityMsg []shoeModelSales
-type errMsg struct{ err error }
-func (e errMsg) Error() string { return e.err.Error() }
 func checkPopularity() tea.Msg {
-
-    // Create an HTTP client and make a GET request.
-    c := &http.Client{Timeout: 10 * time.Second}
-
-	for {
-		response, err := c.Get(popularityURL)
-		if err != nil {
-			if errors.Is(err, syscall.ECONNREFUSED) {
-				return errNotConnectedMsg{err: fmt.Errorf("could not connect to server: %s", popularityURL)}
-			} else {
-				return errMsg{err}
-			}
-		}
-		defer response.Body.Close()
-	
-		if response.StatusCode != http.StatusOK {
-			return errMsg{fmt.Errorf("expected status 200 but got %v", response.Status)}
-		}
-	
-		bodyBytes, err := io.ReadAll(response.Body)
-		if err != nil {
-			return errMsg{err}
-		}
-	
-		// Parse into []shoeModelSales
-		var shoeModelSales []shoeModelSales
-		err = json.Unmarshal(bodyBytes, &shoeModelSales)
-		if err != nil {
-			return errMsg{err}
-		}
-		return popularityMsg(shoeModelSales)
+	bodyBytes, errM := sendGetRequesst(popularityURL)
+	if errM != nil {
+		return errM
 	}
+
+	var shoeModelSales []shoeModelSales
+	err := json.Unmarshal(bodyBytes, &shoeModelSales)
+	if err != nil {
+		return errMsg{err}
+	}
+	return popularityMsg(shoeModelSales)
 }
+
+func sendGetRequesst(url string) ([]byte, tea.Msg) {
+	c := &http.Client{Timeout: 10 * time.Second}
+	response, err := c.Get(url)
+	if err != nil {
+		if errors.Is(err, syscall.ECONNREFUSED) {
+			time.Sleep(5 * time.Second)
+			return nil, errNotConnectedMsg{err: fmt.Errorf("could not connect to server: %s", popularityURL)}
+		} else {
+			return nil, errMsg{err}
+		}
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return nil, errMsg{fmt.Errorf("expected status 200 but got %v", response.Status)}
+	}
+
+	bodyBytes, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, errMsg{err}
+	}
+	return bodyBytes, nil
+}
+
+func wrapText(text string, lineWidth int) string {
+	if len(text) <= lineWidth {
+		return text
+	}
+
+	wrappedText := ""
+	words := strings.Fields(text)
+	currentLine := ""
+
+	for _, word := range words {
+		if len(currentLine)+len(word)+1 > lineWidth {
+			wrappedText += currentLine + "\n" + pad
+			currentLine = word
+		} else {
+			if currentLine != "" {
+				currentLine += " "
+			}
+			currentLine += word
+		}
+	}
+
+	wrappedText += currentLine
+	return wrappedText
+}
+
+var asciiArt = `      _                      _                 
+     | |                    | |                
+  ___| |__   ___   ___   ___| |_ ___  _ __ ___ 
+ / __| '_ \ / _ \ / _ \ / __| __/ _ \| '__/ _ \
+ \__ \ | | | (_) |  __/ \__ \ || (_) | | |  __/
+ |___/_| |_|\___/ \___| |___/\__\___/|_|  \___|
+                                               
+                                               `
