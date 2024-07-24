@@ -16,6 +16,7 @@ import (
 	"io"
 	"errors"
 	"syscall"
+	"strings"
 
 	"log"
 	"github.com/charmbracelet/bubbles/progress"
@@ -30,15 +31,17 @@ const (
 	suggestionsURL = "http://localhost:3000/suggestions"
 )
 
-var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Render
+var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#727272")).Render
+var pad = strings.Repeat(" ", padding)
 
 func main() {
-	f, err := tea.LogToFile("debug.log", "debug")
+	f, err := setupLogging()
 	if err != nil {
 		fmt.Println("fatal:", err)
 		os.Exit(1)
 	}
 	defer f.Close()
+	log.Print("\n\n\nStarting up...")
 
 	m := model{
 		// progress: progress.New(progress.WithDefaultGradient()),
@@ -50,12 +53,27 @@ func main() {
 	}
 }
 
+func setupLogging() (*os.File, error) {
+	// Open the log file in write mode to clear it
+	f, err := os.OpenFile("debug.log", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	if err != nil {
+		return nil, err
+	}
+	f.Close()
+
+	return tea.LogToFile("debug.log", "debug")
+}
+
 type tickMsg time.Time
 
 type model struct {
 	progress progress.Model
-	salesReport []shoeModelSales
+	popularityReport popularityReport
 	err error
+}
+
+type popularityReport struct {
+	shoeModelSales []shoeModelSales
 }
 
 type shoeModelSales struct {
@@ -64,7 +82,6 @@ type shoeModelSales struct {
 }
 
 func (m model) Init() tea.Cmd {
-	// return tickCmd()
 	return  tea.Batch(tickCheckPopularityCmd(), checkPopularity)
 }
 
@@ -88,7 +105,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Note that you can also use progress.Model.SetPercent to set the
 		// percentage value explicitly, too.
 		// cmd := m.progress.IncrPercent(0.25)
-        // make a random float between -0.5 and 0.5
         
         // ran := 0.5 - float64(time.Now().Nanosecond() % 100) / 100
         // cmd := m.progress.SetPercent(ran)
@@ -103,7 +119,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case popularityMsg:
 		m.err = nil
-		m.salesReport = msg
+		m.popularityReport.shoeModelSales = msg
 		return m, tickCheckPopularityCmd()
 
 	case errMsg:
@@ -111,7 +127,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
         return m, tea.Quit
 
 	case errNotConnectedMsg:
-		m.err = msg
+		m.err = errNotConnected{err: msg.err}
 		return m, tickCheckPopularityCmd()
 
 
@@ -122,26 +138,32 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	// If there's an error, print it out and don't do anything else.
+	popularityReport := m.popularityReport.View()
     if m.err != nil {
-		if errors.As(m.err, &errNotConnectedMsg{}) {
-			out := fmt.Sprint("\nWaiting to connect to server...")
-			return out
+		if _, ok := m.err.(errNotConnected); ok {
+			popularityReport = fmt.Sprint("Waiting to connect to server...")
+		} else {
+			return fmt.Sprintf("\nWe had some trouble: %v\n\n", m.err)
 		}
-        return fmt.Sprintf("\nWe had some trouble: %v\n\n", m.err)
     }
 
-	s := fmt.Sprintf("Shoe popularity report:\n")
+	return "\n" +
+		pad + "Welcome to the shoe store dashboard!\n\n" +
+		pad + "This report lets you see the popularity of different shoe models. \n" +
+		pad + popularityReport + "\n\n" +
+		pad + helpStyle("Press any key to quit")
+}
 
-	// pad := strings.Repeat(" ", padding)
-	// return "\n" +
-	// 	pad + m.progress.View() + "\n\n" +
-	// 	pad + helpStyle("Press any key to quit")
-
-	// When the server responds with a sales report, add it to the current line.
-    if len(m.salesReport) != 0 {
-        s += fmt.Sprintf("%v", m.salesReport)
-    }
-	return "\n" + s + "\n\n"
+func (p popularityReport) View() string {
+	result := "\n"
+	result += pad + fmt.Sprintf("%-10s %9s\n", "Model", "% of sales")
+	result += pad + fmt.Sprintf("%-10s %9s\n", strings.Repeat("-", 10), strings.Repeat("-", 9))
+	
+	log.Printf("shoeModelSales: %v", p.shoeModelSales)
+	for _, sale := range p.shoeModelSales {
+		result += pad + fmt.Sprintf("%-10s %6.2f%%\n", sale.ShoeModel, sale.SalesPercent)
+	}
+	return result
 }
 
 
@@ -149,10 +171,13 @@ func (m model) View() string {
 
 
 func tickCheckPopularityCmd() tea.Cmd {
-	return tea.Tick(time.Second*2, func(t time.Time) tea.Msg {
+	return tea.Tick(time.Second*1, func(t time.Time) tea.Msg {
 		return checkPopularity()
 	})
 }
+
+type errNotConnected struct {err error}
+func (e errNotConnected) Error() string { return e.err.Error() }
 
 type errNotConnectedMsg struct {err error}
 func (e errNotConnectedMsg) Error() string { return e.err.Error() }
@@ -168,7 +193,7 @@ func checkPopularity() tea.Msg {
 		response, err := c.Get(popularityURL)
 		if err != nil {
 			if errors.Is(err, syscall.ECONNREFUSED) {
-				return errNotConnectedMsg{fmt.Errorf("could not connect to server: %s", popularityURL)}
+				return errNotConnectedMsg{err: fmt.Errorf("could not connect to server: %s", popularityURL)}
 			} else {
 				return errMsg{err}
 			}
@@ -183,7 +208,6 @@ func checkPopularity() tea.Msg {
 		if err != nil {
 			return errMsg{err}
 		}
-		log.Printf("body: %s\n", bodyBytes)
 	
 		// Parse into []shoeModelSales
 		var shoeModelSales []shoeModelSales
@@ -191,7 +215,6 @@ func checkPopularity() tea.Msg {
 		if err != nil {
 			return errMsg{err}
 		}
-		log.Printf("shoeModelSales: %+v\n", shoeModelSales)
 		return popularityMsg(shoeModelSales)
 	}
 }

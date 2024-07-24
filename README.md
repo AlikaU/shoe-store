@@ -8,6 +8,8 @@ The application monitors and adjust the inventory of shoes in real-time by proce
 
 I assume that each new incoming websocket event represents 1 sale. I assume that the 'inventory' field represents the number of shoes of that model *left* (not the number of shoes *sold*). Since the number of shoes sold isn't specified, I assume 1 pair was sold, and that the inventory fluctuations are due to some other events, as well as the toy example nature of this project.
 
+The original source creates sales of each model with equal probability, I took the liberty to modify it to create more variation in sale numbers.
+
 ## Features
 
 ### Shoe popularity report
