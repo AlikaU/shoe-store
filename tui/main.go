@@ -148,6 +148,11 @@ func (m model) View() string {
     }
 
 	return "\n" +
+  	`         __                  __              
+    ___ / /  ___  ___   ___ / /____  _______ 
+   (_-</ _ \/ _ \/ -_) (_-</ __/ _ \/ __/ -_)
+  /___/_//_/\___/\__/ /___/\__/\___/_/  \__/ 
+                                           ` + "\n\n" +
 		pad + "Welcome to the shoe store dashboard!\n\n" +
 		pad + "This report lets you see the popularity of different shoe models. \n" +
 		pad + popularityReport + "\n\n" +
@@ -155,13 +160,57 @@ func (m model) View() string {
 }
 
 func (p popularityReport) View() string {
+	// result := "\n"
+	// result += pad + fmt.Sprintf("%-10s %9s\n", "Model", "% of sales")
+	// result += pad + fmt.Sprintf("%-10s %9s\n", strings.Repeat("-", 10), strings.Repeat("-", 9))
+	
+	// log.Printf("shoeModelSales: %v", p.shoeModelSales)
+	// for _, sale := range p.shoeModelSales {
+	// 	result += pad + fmt.Sprintf("%-10s %6.2f%%\n", sale.ShoeModel, sale.SalesPercent)
+	// }
+	// return result
+	// maxWidth := 50 // Maximum width for the bar
+	// pad := strings.Repeat(" ", 2)
+	
+	// // Find the maximum sales percentage
+	// maxSalesPercent := 0.0
+	// for _, sale := range p.shoeModelSales {
+	// 	if sale.SalesPercent > maxSalesPercent {
+	// 		maxSalesPercent = sale.SalesPercent
+	// 	}
+	// }
+
+	// result := "\n"
+	// result += pad + fmt.Sprintf("%-10s %9s %s\n", "Model", "% of sales", "Bar")
+	// result += pad + fmt.Sprintf("%-10s %9s %s\n", strings.Repeat("-", 10), strings.Repeat("-", 9), strings.Repeat("-", maxWidth))
+
+	// log.Printf("shoeModelSales: %v", p.shoeModelSales)
+	// for _, sale := range p.shoeModelSales {
+	// 	barLength := int((sale.SalesPercent / maxSalesPercent) * float64(maxWidth))
+	// 	bar := strings.Repeat("|", barLength)
+	// 	result += pad + fmt.Sprintf("%-10s %6.2f%% %s\n", sale.ShoeModel, sale.SalesPercent, bar)
+	// }
+	// return result
+	barWidth := 59 // Maximum width for the bar
+	pad := strings.Repeat(" ", 2)
+	
+	// Find the maximum sales percentage
+	maxSalesPercent := 0.0
+	for _, sale := range p.shoeModelSales {
+		if sale.SalesPercent > maxSalesPercent {
+			maxSalesPercent = sale.SalesPercent
+		}
+	}
+
 	result := "\n"
 	result += pad + fmt.Sprintf("%-10s %9s\n", "Model", "% of sales")
-	result += pad + fmt.Sprintf("%-10s %9s\n", strings.Repeat("-", 10), strings.Repeat("-", 9))
-	
+	result += pad + fmt.Sprintf(strings.Repeat("-", maxWidth - 2) + "\n")
+
 	log.Printf("shoeModelSales: %v", p.shoeModelSales)
 	for _, sale := range p.shoeModelSales {
-		result += pad + fmt.Sprintf("%-10s %6.2f%%\n", sale.ShoeModel, sale.SalesPercent)
+		barLength := int((sale.SalesPercent / maxSalesPercent) * float64(barWidth))
+		bar := strings.Repeat("|", barLength)
+		result += pad + fmt.Sprintf("%-10s %-59s %6.2f%%\n", sale.ShoeModel, bar, sale.SalesPercent)
 	}
 	return result
 }
