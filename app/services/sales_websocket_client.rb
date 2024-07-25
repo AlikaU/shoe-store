@@ -6,7 +6,8 @@ class SalesWebsocketClient
   def self.start
     Thread.new do # todo: graceful stop?
       EM.run do
-        ws = Faye::WebSocket::Client.new("ws://localhost:8080/") # todo: configure path
+        shoe_events_address = ENV.fetch("SHOE_EVENTS_ADDRESS", "ws://localhost:8080/")
+        ws = Faye::WebSocket::Client.new(shoe_events_address)
         sleep 3
         p "Connecting to websocket server..." # todo: retry?
         ws.on :open do |event|

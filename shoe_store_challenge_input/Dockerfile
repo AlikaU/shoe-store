@@ -3,6 +3,7 @@ FROM ruby:3.3-slim
 WORKDIR /app
 
 COPY bin/ ./bin/
+RUN ls
 COPY inventory.rb ./inventory.rb
 
 RUN chmod +x ./bin/*
