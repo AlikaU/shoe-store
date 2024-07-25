@@ -34,14 +34,14 @@ class Suggestions
   class PutOnSale < Suggestion
     def suggest
       worst_seller = sales_stats(:worst)
-      "Discount idea: #{worst_seller[:model]} is falling behind with just #{worst_seller[:sales_percent]}% of total sales. Consider a discount to move inventory."
+      "#{worst_seller[:model]} is falling behind with only #{worst_seller[:sales_percent]}% of total sales. Consider putting it on discount."
     end
   end
 
   class OrderMore < Suggestion
     def suggest
       best_seller = sales_stats(:best)
-      "Top performer: #{best_seller[:model]} is the crowd favorite, making up #{best_seller[:sales_percent]}% of total sales. Keep up with customer demand by ordering more!"
+      "#{best_seller[:model]} is selling really well, making up #{best_seller[:sales_percent]}% of total sales. We should order some more!"
     end
   end
 end

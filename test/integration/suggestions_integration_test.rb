@@ -37,7 +37,7 @@ class SuggestionsControllerTest < ActionDispatch::IntegrationTest
 
     # assert
     assert_response :success
-    expected = "Discount idea: Model A is falling behind with just (0.17% of total sales). Consider a discount to move inventory."
+    expected = "Model A is falling behind with only 16.67% of total sales. Consider putting it on discount."
     assert_equal expected, JSON.parse(response.body)["suggestion"]
   end
 
@@ -51,7 +51,7 @@ class SuggestionsControllerTest < ActionDispatch::IntegrationTest
 
     # assert
     assert_response :success
-    expected = "Top performer: Model B is the crowd favorite, making up 0.5% of total sales. Keep up with customer demand by ordering more!"
+    expected = "Model B is selling really well, making up 50.0% of total sales. We should order some more!"
     assert_equal expected, JSON.parse(response.body)["suggestion"]
   end
 end

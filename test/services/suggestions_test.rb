@@ -20,14 +20,14 @@ class SuggestionsTest < ActiveSupport::TestCase
   test "PutOnSale returns correct suggestion" do
     put_on_sale = Suggestions::PutOnSale.new
     suggestion = put_on_sale.suggest
-    expected = "Discount idea: Model A is falling behind with just (0.17% of total sales). Consider a discount to move inventory."
+    expected = "Model A is falling behind with only 16.67% of total sales. Consider putting it on discount."
     assert_equal expected, suggestion
   end
 
   test "OrderMore returns correct suggestion" do
     order_more = Suggestions::OrderMore.new
     suggestion = order_more.suggest
-    expected = "Top performer: Model B is the crowd favorite, making up 0.5% of total sales. Keep up with customer demand by ordering more!"
+    expected = "Model B is selling really well, making up 50.0% of total sales. We should order some more!"
     assert_equal expected, suggestion
   end
 end
