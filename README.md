@@ -58,7 +58,7 @@ curl --location 'http://localhost:3000/suggestions'
 
 ## Pre-requisites
 - Ruby 3.3.3
-- Go 1.22
+- Go 1.22 or Linux
 
 ## Run the shoe events app
 A modified version of the app provided with the challenge is in the shoe_store_challenge_input folder. Run it with:
@@ -84,7 +84,7 @@ curl --location 'http://localhost:3000/suggestions'
 
 ## Run the UI
 
-If you don't have Go installed, but you're on Linux, you can use the Docker steps above.
+If you don't have Go installed, but you're on Linux, you can use the Docker steps above (on other systems the network=host flag isn't supported and requests won't go through.)
 If you have Go, you can:
 ```
 cd tui
