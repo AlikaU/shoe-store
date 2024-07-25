@@ -1,0 +1,52 @@
+openapi: 3.0.0
+info:
+  title: Shoe Store API
+  version: 1.0.0
+  description: API for retrieving popularity reports and sales suggestions for shoe models.
+paths:
+  /popularity:
+    get:
+      summary: Get the popularity report
+      responses:
+        '200':
+          description: A JSON array of shoe model popularity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PopularityReport'
+        '500':
+          description: Internal server error
+  /suggestions:
+    get:
+      summary: Get sales suggestions
+      responses:
+        '200':
+          description: A JSON object with sales suggestions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SalesSuggestion'
+        '500':
+          description: Internal server error
+components:
+  schemas:
+    PopularityReport:
+      type: array
+      items:
+        $ref: '#/components/schemas/ModelSales'
+    ModelSales:
+      type: object
+      properties:
+        model:
+          type: string
+          example: "ModelA"
+        sales_percent:
+          type: number
+          format: float
+          example: 33.33
+    SalesSuggestion:
+      type: object
+      properties:
+        suggestion:
+          type: string
+          example: "Consider putting ModelX on discount."

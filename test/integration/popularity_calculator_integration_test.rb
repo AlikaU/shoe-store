@@ -3,7 +3,13 @@ require "faye/websocket"
 require "helpers/mock_websocket_server"
 require "em-eventsource"
 
-
+# The tests in this file cover:
+# - processing incoming sales data
+# - db interaction
+# - handling invalid data
+# - calculating sales percentage
+# - serving the popularity report
+# todo: can we get a 500 response? add a test for it
 class PopularityCalculatorIntegrationTest < ActionDispatch::IntegrationTest
   # for the websocket test attempt
   # def teardown
@@ -67,7 +73,8 @@ class PopularityCalculatorIntegrationTest < ActionDispatch::IntegrationTest
   end
 
 
-  # Attempt to test business logic + websocket client, by making a mock websocket server
+  # Attempt to cover the websocket client, by making a mock websocket server, did not manage to get it working
+  #
   # test "should receive sales events and calculate sales percentage correctly" do
   #   # arrange
   #   @mock_server = MockWebSocketServer.new(8080), todo: pass it some mock data to send

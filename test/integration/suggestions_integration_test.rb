@@ -1,6 +1,12 @@
 require "test_helper"
 require "mocha/minitest"
 
+# The tests in this file cover:
+# - processing incoming sales data
+# - db interaction
+# - creating suggestions based on data
+# - serving the suggestion
+# todo: can we get a 500 response? add a test for it
 class SuggestionsControllerTest < ActionDispatch::IntegrationTest
   def setup
     Sale.delete_all

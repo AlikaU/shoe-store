@@ -1,3 +1,5 @@
+# This class is responsible for generating suggestions based on sales data.
+# It randomly selects a suggestion type and generates a suggestion message.
 class Suggestions
   def initialize
     @suggestions = [ PutOnSale, OrderMore ]
@@ -31,6 +33,7 @@ class Suggestions
     end
   end
 
+  # Suggest putting the worst selling model on sale
   class PutOnSale < Suggestion
     def suggest
       worst_seller = sales_stats(:worst)
@@ -38,6 +41,7 @@ class Suggestions
     end
   end
 
+  # Suggest ordering more of the best selling model
   class OrderMore < Suggestion
     def suggest
       best_seller = sales_stats(:best)

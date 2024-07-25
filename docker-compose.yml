@@ -1,18 +1,6 @@
 # This is a quick docker-compose to run the apps together for convenience, nothing nice.
 
 services:
-  shoe_store_api:
-    image: shoe_store_api
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails db:migrate && bundle exec rails server -b 0.0.0.0"
-    environment:
-      SHOE_EVENTS_ADDRESS: ws://shoe_store_events:8080
-      RAILS_ENV: production
-      SECRET_KEY_BASE: fb408c6c31df510280bd3a3b6407b87b2cf6e40712a29a16e53bf23e563a1209619e83f575d6f983b1e7572f150aceeb35575684ae7f5e91606e763fc72e5171
-    ports:
-      - "3000:3000"
   shoe_store_events:
     image: shoe_store_events
     build:
@@ -20,3 +8,19 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+
+  shoe_store_api:
+    image: shoe_store_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails db:setup && bundle exec rails server -b 0.0.0.0"
+    environment:
+      SHOE_EVENTS_ADDRESS: ws://shoe_store_events:8080
+      RAILS_ENV: production
+      SECRET_KEY_BASE: fb408c6c31df510280bd3a3b6407b87b2cf6e40712a29a16e53bf23e563a1209619e83f575d6f983b1e7572f150aceeb35575684ae7f5e91606e763fc72e5171
+    ports:
+      - "3000:3000"
+    depends_on:
+      shoe_store_events:
+        condition: service_started

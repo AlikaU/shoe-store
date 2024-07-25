@@ -63,8 +63,6 @@ func setupLogging() (*os.File, error) {
 	return tea.LogToFile("debug.log", "debug")
 }
 
-type tickMsg time.Time
-
 type model struct {
 	progress         progress.Model
 	popularityReport popularityReport
@@ -100,12 +98,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 
-	// FrameMsg is sent when the progress bar wants to animate itself
-	case progress.FrameMsg:
-		progressModel, cmd := m.progress.Update(msg)
-		m.progress = progressModel.(progress.Model)
-		return m, cmd
-
 	case popularityMsg:
 		m.err = nil
 		m.popularityReport.shoeModelSales = msg
@@ -122,6 +114,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case errNotConnectedMsg:
 		m.err = errNotConnected{err: msg.err}
+		log.Printf("Could not connect to server: %v, retrying...", msg.err)
 		return m, tickCheckPopularityCmd()
 
 	default:
@@ -155,8 +148,6 @@ func (m model) View() string {
 }
 
 func (p popularityReport) View() string {
-
-	// return result
 	maxBarWidth := 59
 	pad := strings.Repeat(" ", 2)
 

@@ -38,6 +38,9 @@ when "production"
   workers workers_count if workers_count > 1
 
   preload_app!
+
+  # note: workaround
+  bind "tcp://0.0.0.0:3000"
 when "development"
   # Specifies a very generous `worker_timeout` so that the worker
   # isn't killed by Puma when suspended by a debugger.
@@ -46,8 +49,6 @@ end
 
 # Specifies the `port` that Puma will listen on to receive requests; default is 3000.
 port ENV.fetch("PORT", 3000)
-# note: workaround
-bind "tcp://0.0.0.0:3000"
 
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart
